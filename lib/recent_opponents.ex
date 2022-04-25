@@ -1,12 +1,30 @@
 defmodule RecentOpponents do
+  alias __MODULE__.FetchRecentOpponents
+  alias __MODULE__.SummonerMonitor
 
-  def fetch_recent_opponents(summoner_name \\ "SwordArt", region \\ "americas")
-  def fetch_recent_opponents(summoner_name, region) do
-    api_key = System.get_env "LEAGUE_API_KEY"
+  def fetch_and_monitor_recent_opponents(summoner_name  \\ "SwordArt", summoner_region \\ "na1") do
+    api_key = System.get_env("LEAGUE_API_KEY")
 
-    url = "https://#{region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/#{summoner_name}?api_key=#{api_key}"
+    case FetchRecentOpponents.fetch_recent_opponents(summoner_name, summoner_region, api_key) do
+      {:error, reason = "Rate limit Exceeded"} ->
+        IO.puts "Failed because '#{reason}.'  Try again later."
+      {:error, reason} ->
+        IO.puts "Failed because '#{reason}.'"
+      recent_opponents ->
+        Enum.each(recent_opponents, fn opponent ->
+          data = %{
+            summoner: opponent,
+            region: summoner_region,
+            api_key: api_key
+          }
+          {:ok, _pid} = SummonerMonitor.start_link(data)
+        end)
 
-    IO.puts url
+        Enum.map(recent_opponents, fn opponent -> opponent[:name] end)
+    end
   end
+
+
+
 
 end
