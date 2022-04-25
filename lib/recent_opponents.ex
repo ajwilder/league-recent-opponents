@@ -2,7 +2,7 @@ defmodule RecentOpponents do
   alias __MODULE__.FetchRecentOpponents
   alias __MODULE__.SummonerMonitor
 
-  def fetch_and_monitor_recent_opponents(summoner_name  \\ "SwordArt", summoner_region \\ "na1") do
+  def fetch_and_monitor_recent_opponents(summoner_name, summoner_region) do
     api_key = System.get_env("LEAGUE_API_KEY")
 
     case FetchRecentOpponents.fetch_recent_opponents(summoner_name, summoner_region, api_key) do
